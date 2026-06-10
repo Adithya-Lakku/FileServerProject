@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>File Download</title>
+</head>
+<body>
+
+    <h2>
+        Upload files
+    </h2>
+    <form action="/upload" method="post" enctype="multipart/form-data">
+        <input type="file" name="file" >
+        <button type="submit">
+            Upload
+        </button>
+    </form>
+
+
+    <h2>List files</h2>
+    
+    <a href="/files">list</a>
+    <h2>Download File</h2> 
+
+    
+
+    <form action="/download" method="post">
+        <label for="filename">Filename:</label>
+        <input
+            type="text"
+            id="filename"
+            name="filename"
+        >
+
+        <button type="submit">
+            Download
+        </button>
+    </form>
+
+</body>
+</html>

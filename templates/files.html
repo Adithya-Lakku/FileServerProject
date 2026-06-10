@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>File List</title>
+</head>
+<body>
+
+
+    <h2>List files</h2>
+    
+    <ul>
+        {% for file in files %}
+            <li>{{ file }}</li>
+            <br>
+            <br>
+
+        {% endfor %}
+    </ul>
+
+    <form action = "/">
+        <button type="submit">
+            return to home
+        </button>
+    </form>
+
+
+    
+</body>
+</html>
