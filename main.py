@@ -4,9 +4,13 @@ from pathlib import Path
 from fastapi.templating import Jinja2Templates
 import uuid
 import uvicorn
-import logging
+#import logging
+import sqlalchemy.orm as _orm
+from db import services as _services
+from typing import Annotated
+import os
 
-logger = logging.getLogger(__name__)
+#logger = logging.getLogger(__name__) it seems print works
 
 #msg
 
@@ -17,25 +21,47 @@ app = FastAPI()
 UPLOAD_DIR = Path("uploads")
 UPLOAD_DIR.mkdir(exist_ok = True)   #creates directory if true
 
+DbSession = Annotated[_orm.Session,FastAPI.Depends(_services.get_db)] #this shit only helps with pydantic hints but why not
+
 
 #upload endpnt
 
 @app.post("/upload")
-async def upload_file(file:UploadFile,request:Request):
-    file_id = str(uuid.uuid1())
+async def upload_file(file:UploadFile,request:Request,db:DbSession ):
+    
+    
+    
+    
+    file_id = str(uuid.uuid4())
 
     original_name = Path(file.filename).name  #to avoid pathinjection
+    
+
 
     save_path = UPLOAD_DIR / f"{file_id}_{original_name}"
 
+
+    try:
+        # Fetch the file size in bytes
+        file_size_bytes = save_path.stat().st_size
+        print(f"File size: {file_size_bytes} bytes")
+    except FileNotFoundError:
+        print("The specified file does not exist.")
+    
+
     with open(save_path,"wb") as f:
-        while chunk := await file.read(12500 * 12500):  # 1 mb reads (can be increased for faster)
+        while chunk := await file.read(12500 * 12500):  # 100 mb reads (can be increased for faster)
             f.write(chunk)
     
-    # return {"file_id":file_id,
-    #         "filename":original_name
-            
-    #         }
+
+        
+    """    return {"file_id":file_id,
+                "filename":original_name
+                
+                }
+    """
+
+    _services.create_file(db=db)
 
     return templates.TemplateResponse(
     request=request,
