@@ -1,25 +1,19 @@
 from fastapi import FastAPI,UploadFile,HTTPException,Request,Form
 from fastapi.responses import FileResponse
-from pathlib import Path
 from fastapi.templating import Jinja2Templates
-import uuid
 import uvicorn
-#import logging
+from pathlib import Path
 import sqlalchemy.orm as _orm
 from db import services as _services
 from typing import Annotated
-import os
 
-#logger = logging.getLogger(__name__) it seems print works
-
-#msg
 
 
 
 app = FastAPI()
 
-UPLOAD_DIR = Path("uploads")
-UPLOAD_DIR.mkdir(exist_ok = True)   #creates directory if true
+"""UPLOAD_DIR = Path("uploads")
+UPLOAD_DIR.mkdir(exist_ok = True)   #creates directory if true"""
 
 DbSession = Annotated[_orm.Session,FastAPI.Depends(_services.get_db)] #this shit only helps with pydantic hints but why not
 
@@ -32,26 +26,28 @@ async def upload_file(file:UploadFile,request:Request,db:DbSession ):
     
     
     
-    file_id = str(uuid.uuid4())
+    """    file_id = str(uuid.uuid4())
 
-    original_name = Path(file.filename).name  #to avoid pathinjection
-    
-
-
-    save_path = UPLOAD_DIR / f"{file_id}_{original_name}"
+        original_name = Path(file.filename).name  #to avoid pathinjection
+        
 
 
-    try:
-        # Fetch the file size in bytes
-        file_size_bytes = save_path.stat().st_size
-        print(f"File size: {file_size_bytes} bytes")
-    except FileNotFoundError:
-        print("The specified file does not exist.")
-    
+        save_path = UPLOAD_DIR / f"{file_id}_{original_name}"
 
-    with open(save_path,"wb") as f:
-        while chunk := await file.read(12500 * 12500):  # 100 mb reads (can be increased for faster)
-            f.write(chunk)
+
+        try:
+            # Fetch the file size in bytes
+            file_size_bytes = save_path.stat().st_size
+            print(f"File size: {file_size_bytes} bytes")
+        except FileNotFoundError:
+            print("The specified file does not exist.")
+        
+
+        with open(save_path,"wb") as f:
+            while chunk := await file.read(12500 * 12500):  # 100 mb reads (can be increased for faster)
+                f.write(chunk)
+                 # processing now in services.py
+                """
     
 
         
@@ -61,7 +57,9 @@ async def upload_file(file:UploadFile,request:Request,db:DbSession ):
                 }
     """
 
-    _services.create_file(db=db)
+    original_name = Path(file.filename).name
+    await _services.create_file(file=file,db=DbSession)
+
 
     return templates.TemplateResponse(
     request=request,
@@ -74,16 +72,24 @@ async def upload_file(file:UploadFile,request:Request,db:DbSession ):
 
 @app.get("/files")
 def list_file(request:Request):
-    files = []
 
-    for f in UPLOAD_DIR.iterdir():
-        if f.is_file():
-            files.append(f.name)  
-            
+    try:
+        files = _services.get_files(db=DbSession)
+        print("file success")
+    except FileNotFoundError:
+        print("couldnt find file")
+        
+
+    """  for f in UPLOAD_DIR.iterdir():
+            if f.is_file():
+                files.append(f.name)  
+                """
             
             
             
                               #needs to be changed to show thumbnail
+    
+    
     return templates.TemplateResponse(
     request=request,
     name="files.html",
@@ -95,13 +101,15 @@ templates = Jinja2Templates(directory="templates")
 
 #download
 @app.post("/download")
-def download_file(filename: str = Form(...)):
+def download_file(file_id: str = Form(...)):
     # Prevent path traversal attacks
     print("I GOT HERE")
-    filename = Path(filename).name
+
+
+    #filename = Path(filename).name
     
 
-    file_path = UPLOAD_DIR / filename
+    file_path , filename = _services.download_file(file_id=file_id,db=DbSession)
     
 
     if not file_path.exists():

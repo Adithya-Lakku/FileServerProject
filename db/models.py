@@ -7,20 +7,20 @@ import uuid
 
 
 
-# class Users(_database.Base):
+# class User(_database.Base):
 #     __tablename__="users"
 #     id =  _sql.Column(_sql.Integer,primary_key=True)
 #     username = _sql.Column(_sql.String,unique=True,nullable=False)
 #     password_hash = _sql.Column(_sql.String,nullable=False)
 
 
-class Files(_database.Base):
+class File(_database.Base):
     __tablename__ = "files"
 
-    id = _sql.Column(_pgUUID(as_uuid=True), primary_key=True,default = uuid.uuid4)
+    id = _sql.Column(_pgUUID(as_uuid=True), primary_key=True) #default = uuid.uuid4 let services handle it
     filename = _sql.Column(_sql.String, nullable=False)
     filepath = _sql.Column(_sql.String, nullable=False)
     size_bytes = _sql.Column(_sql.BigInteger)
     #uploaded_by = _sql.Column(_sql.Integer, _sql.ForeignKey("users.id"))
     date_created = _sql.Column(_sql.DateTime,default = _dt.datetime.now)
-    file_metadata = _sql.Column("metadata", _sql.JSON)
+    file_metadata = _sql.Column("metadata", _sql.JSON,nullable=True)

@@ -9,7 +9,7 @@ class _BaseFile(_pydantic.BaseModel):
     filepath : str
     size_bytes : int
     date_created :_dt.datetime
-    file_metadata : dict
+    file_metadata : dict | None = None   #THIS MAKES IT NULLABLE
 
 
 
@@ -20,24 +20,29 @@ class File(_BaseFile):
 
     model_config = ConfigDict(from_attributes=True)
 
-# class User(_pydantic.BaseModel):
-#     id : int
+    
+    
+    
+    
+    
+    """class User(_pydantic.BaseModel):
+        id : int
 
-#     username : str
-#     password_hash : str
+        username : str
+        password_hash : str
 
-#     model_config = ConfigDict(from_attributes=True) let me save it for later
-
-
-
-
-#i might have to seperate users between (id,username ) and (username,password) as one class
-
-
+        model_config = ConfigDict(from_attributes=True) let me save it for later
 
 
 
 
+    i might have to seperate users between (id,username ) and (username,password) as one class
+
+
+
+
+
+    """
 
 
 
