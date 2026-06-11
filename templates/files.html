@@ -10,7 +10,17 @@
     
     <ul>
         {% for file in files %}
-            <li>{{ file }}</li>
+            <li>{{ file }}</li> 
+            <form action="/download" method="post" style="display:inline;"> 
+            <input type="hidden" name="file_id" value="{{ file }}">
+            <button type="submit">Download</button> 
+            </form>
+
+
+            <form action="/delete" method="post" style="display:inline;"> 
+            <input type="hidden" name="file_id" value="{{ file }}">
+            <button type="submit">Delete</button> 
+            </form>
             <br>
             <br>
 

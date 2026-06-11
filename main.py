@@ -1,4 +1,4 @@
-from fastapi import FastAPI,UploadFile,HTTPException,Request,Form
+from fastapi import FastAPI,UploadFile,HTTPException,Request,Form,Depends
 from fastapi.responses import FileResponse
 from fastapi.templating import Jinja2Templates
 import uvicorn
@@ -11,17 +11,18 @@ from typing import Annotated
 
 
 app = FastAPI()
+templates = Jinja2Templates(directory="templates")
 
 """UPLOAD_DIR = Path("uploads")
 UPLOAD_DIR.mkdir(exist_ok = True)   #creates directory if true"""
 
-DbSession = Annotated[_orm.Session,FastAPI.Depends(_services.get_db)] #this shit only helps with pydantic hints but why not
+DbSession = Annotated[_orm.Session,Depends(_services.get_db)] #this shit only helps with pydantic hints but why not
 
 
 #upload endpnt
 
 @app.post("/upload")
-async def upload_file(file:UploadFile,request:Request,db:DbSession ):
+async def upload_file(file:UploadFile,request:Request,db:DbSession):
     
     
     
@@ -58,7 +59,7 @@ async def upload_file(file:UploadFile,request:Request,db:DbSession ):
     """
 
     original_name = Path(file.filename).name
-    await _services.create_file(file=file,db=DbSession)
+    await _services.create_file(file=file,db=db)
 
 
     return templates.TemplateResponse(
@@ -71,13 +72,15 @@ async def upload_file(file:UploadFile,request:Request,db:DbSession ):
 #list files
 
 @app.get("/files")
-def list_file(request:Request):
+def list_file(request:Request,db:DbSession):
+    
 
     try:
-        files = _services.get_files(db=DbSession)
+        files = _services.get_files(db=db)
         print("file success")
-    except FileNotFoundError:
+    except Exception:
         print("couldnt find file")
+        files = []
         
 
     """  for f in UPLOAD_DIR.iterdir():
@@ -97,22 +100,22 @@ def list_file(request:Request):
 )
 
 
-templates = Jinja2Templates(directory="templates")
+
 
 #download
 @app.post("/download")
-def download_file(file_id: str = Form(...)):
+def download_file(file_id: str = Form(...),db:DbSession = None):
     # Prevent path traversal attacks
     print("I GOT HERE")
-
+    print(file_id)
 
     #filename = Path(filename).name
     
 
-    file_path , filename = _services.download_file(file_id=file_id,db=DbSession)
+    file_path , filename = _services.download_file(file_id=file_id,db=db)
     
 
-    if not file_path.exists():
+    if not Path(file_path).exists():
         raise HTTPException(
             status_code=404,
             detail="File not found"
@@ -123,6 +126,22 @@ def download_file(file_id: str = Form(...)):
         media_type="application/octet-stream",
         filename=filename
     )
+
+
+@app.post("/delete")
+def delete_file(request:Request,file_id:str = Form(...),db:DbSession = None):
+
+    msg = _services.delete_file(file_id=file_id,db=db)
+
+    return templates.TemplateResponse(
+        request=request,
+        name="delete.html",
+        context={"resp": msg}
+    )
+
+
+
+
 @app.get("/")
 def home(request: Request):
     return templates.TemplateResponse(
@@ -132,5 +151,5 @@ def home(request: Request):
 
 
 if __name__ == '__main__':
-    #uvicorn.run("main:app",host="0.0.0.0",port=8000,reload=True)
-    uvicorn.run(app,host="0.0.0.0",port=8000)
+    uvicorn.run("main:app",host="0.0.0.0",port=8000,reload=True)
+    #uvicorn.run(app,host="0.0.0.0",port=8000)
