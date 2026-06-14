@@ -76,12 +76,12 @@ def list_file(request:Request,db:DbSession):
     
 
     try:
-        files = _services.get_files(db=db)
+        files = _services.get_files(db=db) # list of (id,name)
         print("file success")
     except Exception:
         print("couldnt find file")
         files = []
-        
+    print(files)
 
     """  for f in UPLOAD_DIR.iterdir():
             if f.is_file():

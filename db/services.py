@@ -79,17 +79,25 @@ async def create_file(file:UploadFile ,db:"Session") -> _schemas.File: # dont kn
 
 def get_files(db: "Session") :
     
-    """    dbfile = db.query(_models.File.id).all()
-        print(dbfile)
-        return _schemas.File_id.model_validate(dbfile)"""
-   
-    print(db.query(_models.File).all())
-   
-    rows = db.query(_models.File.id).all()    
+       
+    rows = db.query(_models.File.id,_models.File.filename).all()    
 
 
-    return [row[0] for row in rows]
-    #return db.query(_models.File).scalars().all()
+    return [(row[0],row[1]) for row in rows]
+
+    # rows = db.query(
+    #     _models.File.id,
+    #     _models.File.filename
+    # ).all()
+
+    # return [
+    #     _schemas.FileSummary(
+    #         id=row[0],
+    #         filename=row[1]
+    #     )
+    #     for row in rows
+    # ]    
+
 
 def download_file(file_id : str,db:"Session"):
     dbfile = db.query(_models.File).filter(_models.File.id==file_id).first()

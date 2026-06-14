@@ -23,8 +23,9 @@ class File(_BaseFile):
     
     
     
-class File_id(_pydantic.BaseModel):
+class FileSummary(_pydantic.BaseModel):
     id: UUID4
+    filename: str
 
     
     """class User(_pydantic.BaseModel):
