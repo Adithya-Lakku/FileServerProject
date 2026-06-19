@@ -3,10 +3,10 @@ from pathlib import Path
 # Add project root to sys.path to resolve 'db' imports when running the script directly
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
-from fastapi import FastAPI,UploadFile,HTTPException
+from fastapi import FastAPI,UploadFile,HTTPException,File
 from pydantic import UUID4
 from db import database as _database
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING,Annotated
 from db import models as _models
 
 from db import schemas as _schemas
@@ -35,52 +35,54 @@ def get_db():
         db.close()
 
 
-async def create_file(file:UploadFile, db:"Session", parent_folder_id: str | None = None) -> _schemas.File:
+async def create_file(files: Annotated[ list[UploadFile],File(...)], db:"Session", parent_folder_id: str | None = None) :   #-> _schemas.File
     
+    for file in files:
     
-    
-    file_id = str(uuid.uuid4())
+        file_id = str(uuid.uuid4())
 
-    original_name = Path(file.filename).name  #to avoid pathinjection
-    
-
-
-    save_path = UPLOAD_DIR / f"{file_id}_{original_name}"
-
-
-
+        original_name = Path(file.filename).name  #to avoid pathinjection
         
-    
-
-    with open(save_path,"wb") as f:
-        while chunk := await file.read(12500 * 12500):  # 100 mb reads (can be increased for faster)
-            f.write(chunk)
 
 
-    file_size_bytes = 0
-    try:
-        # Fetch the file size in bytes
-        file_size_bytes = save_path.stat().st_size
-        print(f"File size: {file_size_bytes} bytes")
-    except FileNotFoundError:
-        print("The specified file does not exist.")
+        save_path = UPLOAD_DIR / f"{file_id}_{original_name}"
 
 
-    parent_uuid = uuid.UUID(parent_folder_id) if parent_folder_id else None
 
-    dbfile = _models.File(
-    id=file_id,
-    filename=original_name,
-    filepath=str(save_path),
-    size_bytes=file_size_bytes,
-    file_metadata={},
-    parent_folder_id=parent_uuid
-    )
+            
+        
 
-    db.add(dbfile)
-    db.commit()
-    db.refresh(dbfile)
-    return _schemas.File.model_validate(dbfile) #i dont know if this right
+        with open(save_path,"wb") as f:
+            while chunk := await file.read(12500 * 12500):  # 100 mb reads (can be increased for faster)
+                f.write(chunk)
+
+
+        file_size_bytes = 0
+        try:
+            # Fetch the file size in bytes
+            file_size_bytes = save_path.stat().st_size
+            print(f"File size: {file_size_bytes} bytes")
+        except FileNotFoundError:
+            print("The specified file does not exist.")
+
+
+        parent_uuid = uuid.UUID(parent_folder_id) if parent_folder_id else None
+
+        dbfile = _models.File(
+        id=file_id,
+        filename=original_name,
+        filepath=str(save_path),
+        size_bytes=file_size_bytes,
+        file_metadata={},
+        parent_folder_id=parent_uuid
+        )
+
+        db.add(dbfile)
+        db.commit()
+        db.refresh(dbfile)
+
+        _schemas.File.model_validate(dbfile)
+     #i dont know if this right
 
 
 def get_files(db: "Session") :

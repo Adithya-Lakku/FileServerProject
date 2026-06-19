@@ -1,4 +1,4 @@
-from fastapi import FastAPI,UploadFile,HTTPException,Request,Form,Depends
+from fastapi import FastAPI,UploadFile,HTTPException,Request,Form,Depends,File
 from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 import uvicorn
@@ -25,18 +25,25 @@ DbSession = Annotated[_orm.Session,Depends(_services.get_db)] #this shit only he
 async def upload_file(
     request: Request,
     db: DbSession,
-    file: UploadFile,
+    files: Annotated[ list[UploadFile],File(...)],
     parent_folder_id: str | None = Form(None),
     current_path: str = Form("")
 ):
-    original_name = Path(file.filename).name
+    #original_name = Path(file.filename).name
+    original_names = [Path(file.filename).name for file in files]
+
+
+
+
     p_id = parent_folder_id if parent_folder_id else None
-    await _services.create_file(file=file, db=db, parent_folder_id=p_id)
+    await _services.create_file(files=files, db=db, parent_folder_id=p_id)
 
     return templates.TemplateResponse(
         request=request,
         name="upload.html",
-        context={"filename": original_name, "current_path": current_path}
+        #context={"filename": original_name, "current_path": current_path}
+        context={"filenames": original_names, "current_path": current_path}  #all uploaded files in same folder so same current_path
+        
     )
 
 

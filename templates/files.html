@@ -28,7 +28,7 @@
 
     <h3>Upload File here</h3>
     <form action="/upload" method="post" enctype="multipart/form-data" style="margin-bottom: 20px;">
-        <input type="file" name="file" required>
+        <input type="file" name="files" required multiple>
         <input type="hidden" name="parent_folder_id" value="{{ current_folder.id if current_folder else '' }}">
         <input type="hidden" name="current_path" value="{{ current_path }}">
         <button type="submit">Upload</button>

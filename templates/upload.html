@@ -5,8 +5,19 @@
 </head>
 <body>
 
-    <h2>Uploaded file</h2>
-    <h3>{{filename}}</h3>
+
+    <h3>
+        {% for filename in filenames %}
+        <h3>
+            uploaded file : {{filename}}
+        </h3>
+
+        {% endfor %}
+    
+    
+    </h3>
+
+
     
     <form action="/files/{{ current_path }}" method="get">
         <button type="submit">Return to Folder</button>
