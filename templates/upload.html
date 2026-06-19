@@ -1,21 +1,20 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>File uplod</title>
+    <title>File Uploaded</title>
 </head>
 <body>
 
-
     <h2>Uploaded file</h2>
     <h3>{{filename}}</h3>
-    <form action = "/">
-        <button type="submit">
-            return to home
-        </button>
-    </form>
     
-
-
+    <form action="/files/{{ current_path }}" method="get">
+        <button type="submit">Return to Folder</button>
+    </form>
+    <br>
+    <form action="/" method="get">
+        <button type="submit">Return to Home</button>
+    </form>
     
 </body>
 </html>
