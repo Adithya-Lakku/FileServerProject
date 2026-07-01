@@ -21,10 +21,6 @@ UPLOAD_DIR = Path("uploads")
 UPLOAD_DIR.mkdir(exist_ok = True)   #creates directory if true
 
 
-def _add_tables():
-    return _database.Base.metadata.create_all(bind=_database.engine)
-
-
 
 
 def get_db():
@@ -83,6 +79,14 @@ async def create_file(files: Annotated[ list[UploadFile],File(...)], db:"Session
 
         _schemas.File.model_validate(dbfile)
      #i dont know if this right
+
+def get_file_path(file_id:str,db:"Session")->str:
+
+    retpath = db.query(_models.File.filepath).filter(_models.File.id==file_id).scalar()
+
+    return retpath
+
+
 
 
 def get_files(db: "Session") :
@@ -217,5 +221,3 @@ def delete_folder_recursive(folder_id: str, db: "Session"):
     db.commit()
 
 
-if __name__ == "__main__":
-    _add_tables()

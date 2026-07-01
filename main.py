@@ -6,17 +6,36 @@ from pathlib import Path
 import sqlalchemy.orm as _orm
 from db import services as _services
 from typing import Annotated
+from db import init_db as _init_db
+from db import database as _database
+from ai import pdfsummarizer as _summarizer
+
+from contextlib import asynccontextmanager #whatever the fuck this is
+
+BASE_DIR = Path(__file__).resolve().parent
+
+
+
+@asynccontextmanager
+async def lifespan(app):
+    _database.Base.metadata.create_all(bind=_database.engine)  # create tables if needed
+    yield
 
 
 
 
-app = FastAPI()
-templates = Jinja2Templates(directory="templates")
+app = FastAPI(lifespan=lifespan)
+templates = Jinja2Templates(directory=BASE_DIR / "templates")
 
 """UPLOAD_DIR = Path("uploads")
 UPLOAD_DIR.mkdir(exist_ok = True)   #creates directory if true"""
 
 DbSession = Annotated[_orm.Session,Depends(_services.get_db)] #this shit only helps with pydantic hints but why not
+
+
+
+
+
 
 
 #upload endpnt
@@ -165,6 +184,25 @@ def download_file(file_id: str = Form(...),db:DbSession = None):
     )
 
 
+@app.post("/summary")
+async def summarize(
+    request: Request,
+    file_id: str=Form(...),
+    current_path:str = Form(""),
+    db:DbSession = None
+):
+    
+    summary = _summarizer.summarize(file_id,db)
+    print(summary)
+    return templates.TemplateResponse(
+        request = request,
+        name = "summary.html",
+        context={"summary":summary,"current_path": current_path}
+    )
+    
+
+    
+
 @app.post("/delete")
 def delete_file(
     request: Request,
@@ -191,6 +229,7 @@ def home(request: Request):
     )
 
 
-if __name__ == '__main__':
+"""if __name__ == '__main__':
     uvicorn.run("main:app",host="0.0.0.0",port=8000,reload=True)
     #uvicorn.run(app,host="0.0.0.0",port=8000)
+"""

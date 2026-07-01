@@ -5,7 +5,7 @@
 </head>
 <body>
 
-    <h2>Navigation</h2>
+    <h2>Navigation go fuck yourself</h2>
     <div style="margin-bottom: 20px; font-size: 1.1em;">
         {% for crumb in breadcrumbs %}
             {% if not loop.last %}
@@ -73,6 +73,11 @@
                     <input type="hidden" name="file_id" value="{{ file[0] }}">
                     <input type="hidden" name="current_path" value="{{ current_path }}">
                     <button type="submit">Delete</button> 
+                </form>
+                <form action="/summary" method="post" style="display:inline; margin-left: 5px;"> 
+                    <input type="hidden" name="file_id" value="{{ file[0] }}">
+                    <input type="hidden" name="current_path" value="{{ current_path }}">
+                    <button type="submit">summarize</button> 
                 </form>
             </li>
         {% else %}
