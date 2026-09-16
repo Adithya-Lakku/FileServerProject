@@ -11,8 +11,8 @@ import sqlalchemy.orm as _orm
 
 
 DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "postgresql://ADMIN:2371@localhost:5432/testdb"   # fallback for local development
+    "DATABASE_URL"
+    #"postgresql://ADMIN:2371@localhost:5432/testdb"   # fallback for local development
 )
 
 engine = _sql.create_engine(DATABASE_URL)

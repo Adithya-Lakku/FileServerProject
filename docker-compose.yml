@@ -68,15 +68,41 @@ services:
       - fileserver_net
 
 
+#===Prometheus=========================================================
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro          #copying te yml file to put inside ocntainer and :ro means read only      #
+    ports:
+      - '9090:9090'
+
+    networks:
+    - fileserver_net
+
+#===Grafana=============================================================
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - '3000:3000'
+    depends_on:
+      -  prometheus
+    networks:
+    - fileserver_net
+
      
     
 volumes:
   pgdata:
   ollama:
     external: true
+  prometheus:
 
 networks:
   fileserver_net:
+
+
 
 
 

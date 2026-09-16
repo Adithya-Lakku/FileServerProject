@@ -131,7 +131,7 @@ def delete_file(file_id :str,db:"Session") -> str:
     return "deleted:   "+dbfile.filename
 
 
-#filesystem services 
+#filesystem services ----------------------------------------------------------------
 
 def resolve_path_to_folder(path_str: str | None, db: "Session") -> _models.Folder | None:
     if not path_str:

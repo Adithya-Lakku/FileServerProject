@@ -9,7 +9,7 @@ from typing import Annotated
 from db import init_db as _init_db
 from db import database as _database
 from ai import pdfsummarizer as _summarizer
-
+from prometheus_fastapi_instrumentator import Instrumentator
 from contextlib import asynccontextmanager #whatever the fuck this is
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -25,6 +25,7 @@ async def lifespan(app):
 
 
 app = FastAPI(lifespan=lifespan)
+Instrumentator().instrument(app).expose(app)
 templates = Jinja2Templates(directory=BASE_DIR / "templates")
 
 """UPLOAD_DIR = Path("uploads")

@@ -21,7 +21,7 @@ rich-toolkit==0.20.1
 rignore==0.7.6
 sentry-sdk==2.61.1
 SQLAlchemy==2.0.50
-starlette==0.52.1
+starlette==1.0.0
 typer==0.20.0
 typer-slim==0.20.0
 uvicorn==0.49.0
@@ -29,3 +29,5 @@ uvloop==0.22.1
 watchfiles==1.2.0
 websockets==16.0
 requests
+prometheus_client==0.26.0
+prometheus-fastapi-instrumentator==8.1.0
