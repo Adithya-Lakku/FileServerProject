@@ -9,6 +9,7 @@ from typing import Annotated
 from db import init_db as _init_db
 from db import database as _database
 from ai import pdfsummarizer as _summarizer
+from ai import ocr as _ocr
 from prometheus_fastapi_instrumentator import Instrumentator
 from contextlib import asynccontextmanager #whatever the fuck this is
 
@@ -25,7 +26,9 @@ async def lifespan(app):
 
 
 app = FastAPI(lifespan=lifespan)
-Instrumentator().instrument(app).expose(app)
+Instrumentator().instrument(app).expose(app)  # used for prometheurs
+
+
 templates = Jinja2Templates(directory=BASE_DIR / "templates")
 
 """UPLOAD_DIR = Path("uploads")
@@ -184,6 +187,8 @@ def download_file(file_id: str = Form(...),db:DbSession = None):
         filename=filename
     )
 
+#===========AI PART========================
+
 
 @app.post("/summary")
 async def summarize(
@@ -201,8 +206,24 @@ async def summarize(
         context={"summary":summary,"current_path": current_path}
     )
     
-
+@app.post("/ocr")
+async def Ocr(
+    request: Request,
+    file_id: str=Form(...),
+    current_path:str = Form(""),
+    db:DbSession = None
+):
     
+    ocr_text = _ocr.extract_text(file_id,db)
+    #print(summary)
+    return templates.TemplateResponse(
+        request = request,
+        name = "ocr.html",
+        context={"ocr":ocr_text,"current_path": current_path}
+    )
+    
+
+#====================================================
 
 @app.post("/delete")
 def delete_file(

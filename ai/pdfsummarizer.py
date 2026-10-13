@@ -48,6 +48,9 @@ def summarize(file_id,db):
 
             if 'response' in data:
                 output = data['response']
+
+                _services.updateMetadata(file_id, {"summary": output}, db)
+                
                 return output
 
 

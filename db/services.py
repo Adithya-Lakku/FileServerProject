@@ -1,3 +1,4 @@
+from sqlalchemy import JSON
 import sys
 from pathlib import Path
 # Add project root to sys.path to resolve 'db' imports when running the script directly
@@ -219,5 +220,23 @@ def delete_folder_recursive(folder_id: str, db: "Session"):
     # Finally delete the folder itself
     db.delete(folder)
     db.commit()
+
+
+def updateMetadata(file_id:str,updated_metadata:JSON,db:"Session"):
+    dbfile = db.query(_models.File).filter(_models.File.id==file_id).first()
+    if dbfile is None:
+        raise HTTPException(status_code=404, detail="File not found in database")
+
+    current_metadata = dbfile.file_metadata or {}
+    
+    dbfile.file_metadata = {
+        **current_metadata,  #previous metadata
+        **updated_metadata  #new metadata (will overwrite if key already exists)
+    }
+
+    db.commit()
+    db.refresh(dbfile)
+
+    return _schemas.File.model_validate(dbfile)
 
 
